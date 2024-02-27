@@ -311,7 +311,7 @@ const LoginPage = ({navigation}) => {
           'Your account has been successfully created! You can now log in!',
         );
         setTimeout(() => {
-          navigation.replace('Login');
+          navigation.replace('Home');
         }, 3000);
       })
       .catch((error: AxiosError) => {

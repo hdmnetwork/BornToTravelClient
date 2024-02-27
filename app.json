@@ -26,7 +26,7 @@
       "favicon": "./assets/favicon-BTT.png"
     },
     "extra": {
-      "api": "http://192.168.0.25:3000"
+      "api": "http://192.168.1.75:3000"
     }
   }
 }

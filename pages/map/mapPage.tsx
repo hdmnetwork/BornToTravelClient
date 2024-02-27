@@ -97,11 +97,18 @@ const MapPage = () => {
   const [places, setPlaces] = useState<Place[]>([]);
   const [searchText, setSearchText] = useState('');
   const [location, setLocation] = useState<Location.LocationObject>(null);
+  //const [region, setRegion] = useState({
+  //  latitude: location?.coords?.latitude || 50.467388,
+  //  longitude: location?.coords?.longitude || 4.871985,
+  //  latitudeDelta: latitudeDelta,
+  //  longitudeDelta: longitudeDelta,
+  //});
+
   const [region, setRegion] = useState({
-    latitude: location?.coords?.latitude || 50.467388,
-    longitude: location?.coords?.longitude || 4.871985,
-    latitudeDelta: latitudeDelta,
-    longitudeDelta: longitudeDelta,
+    latitude: 50.8503, // Center de Belgium
+    longitude: 4.3517, // Centre de Belgium
+    latitudeDelta: 1.5, 
+    longitudeDelta: 1.5, 
   });
 
   const [activityDetailVisible, setActivityDetailVisible] = useState(false);
@@ -120,14 +127,51 @@ const MapPage = () => {
   // Recharger la map si la geolocalisation change
   useEffect(() => {
     if (location) {
-      setRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: latitudeDelta,
-        longitudeDelta: longitudeDelta,
-      });
+      // If the user is in Belgium, center the map on their location with a higher zoom level
+      if (
+        location.coords.latitude >= 49.6 &&
+        location.coords.latitude <= 51.5 &&
+        location.coords.longitude >= 2.5 &&
+        location.coords.longitude <= 6.4
+      ) {
+        setRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.1, // Adjust as needed for the zoom level when the user is in Belgium
+          longitudeDelta: 0.1, // Adjust as needed for the zoom level when the user is in Belgium
+        });
+      } else {
+        // If the user is not in Belgium, center the map on the geographical center of Belgium with a default zoom level
+        setRegion({
+          latitude: 50.8503,
+          longitude: 4.3517,
+          latitudeDelta: 0.1, // Adjust as needed for the default zoom level when the user is not in Belgium
+          longitudeDelta: 0.1, // Adjust as needed for the default zoom level when the user is not in Belgium
+        });
+      }
     }
   }, [location]);
+
+
+  const handleRegionChange = (newRegion) => {
+  const belgiumBounds = {
+    minLatitude:  49.6,
+    maxLatitude:  51.5,
+    minLongitude:  2.5,
+    maxLongitude:  6.4,
+  };
+
+  if (newRegion.latitude < belgiumBounds.minLatitude || newRegion.latitude > belgiumBounds.maxLatitude) {
+    newRegion.latitudeDelta =  0;
+  }
+
+  if (newRegion.longitude < belgiumBounds.minLongitude || newRegion.longitude > belgiumBounds.maxLongitude) {
+    newRegion.longitudeDelta =  0;
+  }
+
+  setRegion(newRegion);
+};
+
 
   /**
    Fonction pour autoriser ou refuser la demande de geolocalisation
@@ -259,10 +303,10 @@ const MapPage = () => {
   /**
    Fonction pour soumettre la recherche
    */
-  const onSearchSubmit = () => {
+   const onSearchSubmit = () => {
     axios
       .get<NominatimPointOfInterest[]>(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${searchText}&limit=1`,
+        `https://nominatim.openstreetmap.org/search?format=json&q=${searchText}&countrycodes=BE&limit=1`,
       )
       .then(response => {
         if (response.data && response.data.length > 0) {
@@ -277,12 +321,11 @@ const MapPage = () => {
         }
       })
       .catch(error => {
-        console.info('geocoding error.response : ', error.response); //TODO - undefined
-        //FIXME - AxiosError: Network Error //FIXME - when zooming in too much??; can no longer search on the map afterwards
         console.error('Error during geocoding:', error);
       });
   };
-
+  
+  
   /**
    Fonction pour basculer la sélection des catégories
    */
@@ -466,9 +509,11 @@ const MapPage = () => {
       {/* Carte */}
       <View style={styles.mapContainer}>
         <MapView
+      
           style={styles.map}
           provider={PROVIDER_DEFAULT}
           region={region}
+          //onRegionChange={handleRegionChange}
           onRegionChangeComplete={region => {
             const newZoomLevel = getZoomLevel(region.longitudeDelta);
             setZoomLevel(newZoomLevel);
