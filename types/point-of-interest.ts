@@ -1,7 +1,13 @@
+//point-of-interest.ts
+
 export type PointOfInterest = {
-  name: string;
-  localite: string;
-  categorie: string;
-  adresse: string;
   id: string;
+  place: {
+    name: string;
+    localite: string;
+    categorie: string;
+    adresse: string;
+    newId: string; 
+    placeId: string;
+  };
 };

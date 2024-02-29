@@ -1,3 +1,5 @@
+//MyJourney.tsx
+
 import {useFocusEffect} from '@react-navigation/native';
 import React, {useEffect, useState} from 'react';
 import {
@@ -46,9 +48,8 @@ const MyJourney = (): JSX.Element => {
       )
       .then(response => {
         const favorites = response.data;
-        //FIXME - favorites : [] keeps spamming in the console after a delete while I'm on the MyJourney page
         console.info('favorites : ', favorites);
-
+  
         setJourneyData(favorites);
         storeData(favorites);
         checkEmptyArray(favorites);
@@ -65,7 +66,7 @@ const MyJourney = (): JSX.Element => {
             'Erreur lors de la récupération des lieux favoris:',
             error,
           );
-
+  
           if (
             error.response.data.message.includes(
               "Aucun lieu n'as été trouvé pour cet utilisateur",
@@ -84,7 +85,7 @@ const MyJourney = (): JSX.Element => {
         },
       );
   };
-
+  
   useEffect(() => {
     const fetchData = async () => {
       const token = await getToken();
@@ -156,14 +157,14 @@ const MyJourney = (): JSX.Element => {
     ]),
   );
 
-  const removeFromFavorites = async (placeIdToDelete: string) => {
-    if (placeIdToDelete !== undefined) {
+  const removeFromFavorites = async (IdToDelete: string) => {
+    if (IdToDelete !== undefined) {
       try {
         const token = await getToken();
 
         if (token) {
           const response = await axios.delete(
-            `${Constants.expoConfig.extra.api}/favorites/delete/${placeIdToDelete}`,
+            `${Constants.expoConfig.extra.api}/favorites/delete/${IdToDelete}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -188,34 +189,52 @@ const MyJourney = (): JSX.Element => {
         );
       }
     } else {
-      console.log('placeIdToDelete = ', placeIdToDelete);
+      console.log('placeIdToDelete = ', IdToDelete);
     }
   };
 
   // Supprimer un lieu en favoris de l'utilisateur
-  const handleDeletePlace = async (placeId: string) => {
-    console.log('Id de la place a delete -> ', placeId);
+  // Supprimer un lieu en favoris de l'utilisateur
+  const handleDeletePlace = async (idToDelete: string) => {
+    if (idToDelete !== undefined) {
+      try {
+        console.log('ID à supprimer :', idToDelete);  
+  
+        const token = await getToken();
+  
+        if (token) {
+          const response = await axios.delete(
+            `${Constants.expoConfig.extra.api}/favorites/delete/${idToDelete}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          );
+  
+          console.log('Response au delete -> ', response);  
+  
+          if (response.status === 200) {
+            console.log('Lieu supprimé des favoris avec succès');
+            setJourneyData((prevJourney) =>
+             prevJourney.filter((favorite) => favorite.id !== idToDelete)
+        );
 
-    if (journeyData.length < 2) {
-      setNoFavoritesMessage();
-    }
-
-    if (placeId !== undefined) {
-      removeFromFavorites(placeId);
-
-      setJourneyData(prevJourney => {
-        const newJourney = prevJourney.filter(place => place.id !== placeId);
-
-        storeData(newJourney);
-        // Appeler la fonction pour supprimer le lieu des favoris
-        console.log(' -> ', newJourney);
-        return newJourney;
-      });
+            storeData(journeyData);
+          } else {
+            console.error('Erreur lors de la suppression du lieu des favoris LA ??');
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors de la suppression du lieu des favoris ICI ??: ', error);
+      }
     } else {
-      console.log('Aucune place ne correspond a cette ID !');
+      console.log('idToDelete = ', idToDelete);
     }
   };
-
+  
+  
+  
   return (
     <View style={styles.container}>
       {/* Header avec le logo */}
@@ -235,6 +254,7 @@ const MyJourney = (): JSX.Element => {
       <View style={{height: height * 0.11}}></View>
       <View style={styles.container}>
         <View style={styles.placeContainer}>
+           
           <Text style={styles.title}>Mes Favoris</Text>
           <ScrollView style={styles.scrollview}>
             {journeyMessage ? (
@@ -242,12 +262,13 @@ const MyJourney = (): JSX.Element => {
             ) : journeyData.length === 0 ? (
               <Text>Veuillez attendre que vos données se chargent...</Text>
             ) : (
-              journeyData.map((place, index) => (
+              
+              journeyData.map((item, index) => (
                 <View key={index} style={styles.place}>
-                  <Text>{place.name}</Text>
+                  <Text>{item.place.name}</Text>
                   <Text
                     style={styles.deleteButton}
-                    onPress={() => handleDeletePlace(place.id)}>
+                    onPress={() => handleDeletePlace(item.id)}>
                     X
                   </Text>
                 </View>
