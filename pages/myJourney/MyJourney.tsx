@@ -217,7 +217,7 @@ const MyJourney = (): JSX.Element => {
           if (response.status === 200) {
             console.log('Lieu supprimé des favoris avec succès');
             setJourneyData((prevJourney) =>
-             prevJourney.filter((favorite) => favorite.id !== idToDelete)
+             prevJourney.filter((favorite) => favorite.place.id !== idToDelete)
         );
 
             storeData(journeyData);
@@ -260,7 +260,7 @@ const MyJourney = (): JSX.Element => {
             {journeyMessage ? (
               <Text style={{textAlign: 'center'}}>{journeyMessage}</Text>
             ) : journeyData.length === 0 ? (
-              <Text>Veuillez attendre que vos données se chargent...</Text>
+              <Text>  Veuillez attendre.</Text>
             ) : (
               
               journeyData.map((item, index) => (
@@ -268,7 +268,7 @@ const MyJourney = (): JSX.Element => {
                   <Text>{item.place.name}</Text>
                   <Text
                     style={styles.deleteButton}
-                    onPress={() => handleDeletePlace(item.id)}>
+                    onPress={() => handleDeletePlace(item.place.id)}>
                     X
                   </Text>
                 </View>

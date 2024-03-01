@@ -8,6 +8,6 @@ export type PointOfInterest = {
     categorie: string;
     adresse: string;
     newId: string; 
-    placeId: string;
+    id: string;
   };
 };

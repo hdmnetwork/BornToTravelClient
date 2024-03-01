@@ -43,13 +43,7 @@ type Category =
 
 
 
-  const categoryColorMapping: Record<Category, string> = {
-    'Musée': 'blue',
-    'Patrimoine Exceptionnel': 'green',
-    'Point de vue': 'red',
-    'Borne de recharge': 'purple',
-    // Add more categories and colors as needed
-  };
+  
 
 const MapPage = () => {
 
@@ -557,7 +551,7 @@ const MapPage = () => {
         style={{
           width: 40,
           height: 40,
-          tintColor: categoryColorMapping[place.categorieApi] || 'black',
+          //tintColor: categoryColorMapping[place.categorieApi] || 'black',
         }}
       />
     </Marker>
@@ -744,6 +738,13 @@ const MapPage = () => {
             </TouchableOpacity>
           </View>
 
+          {statusMessage && (
+  <View style={[styles.statusMessageContainer, { backgroundColor: 'midnightblue' }]}>
+    <Text style={styles.statusMessageText}>{statusMessage}</Text>
+  </View>
+)}
+
+
           {statusMessage ? (
             <Text
               style={{
@@ -762,7 +763,32 @@ const MapPage = () => {
 
 const {width, height} = Dimensions.get('window');
 
+const MessageDisplay = ({ message, color }) => (
+  <View style={[styles.statusMessageContainer, { backgroundColor: color }]}>
+    <Text style={styles.statusMessageText}>{message}</Text>
+  </View>
+);
+
+
 const styles = StyleSheet.create({
+
+  statusMessageContainer: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+    transform: [{ translateX: -width * 0.3 }, { translateY: -height * 0.3 }],
+    
+  },
+  statusMessageText: {
+    color: 'white',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  
+  
   container: {
     flex: 1,
     backgroundColor: 'blanchedalmond',
